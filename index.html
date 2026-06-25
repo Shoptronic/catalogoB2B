@@ -232,7 +232,7 @@
                     Cerrar [X]
                 </button>
             </div>
-            <div class="w-full max-w-sm mx-auto aspect-square bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 relative flex items-center justify-center">
+            <div class="w-full max-w-md mx-auto h-80 bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 relative flex items-center justify-center">
                 <div id="interactive-reader" class="w-full h-full"></div>
                 <div class="absolute inset-x-0 h-0.5 bg-red-600 top-1/2 animate-bounce opacity-70 shadow-[0_0_8px_#dc2626]"></div>
             </div>
@@ -833,10 +833,14 @@
             html5QrcodeScanner.start(
                 { facingMode: "environment" },
                 {
-                    fps: 10,
-                    qrbox: { width: 300, height: 140 },
+                    fps: 15,
+                    qrbox: function(viewfinderWidth, viewfinderHeight) {
+                        return {
+                            width: Math.floor(viewfinderWidth * 0.95),
+                            height: Math.floor(viewfinderHeight * 0.55)
+                        };
+                    },
                     aspectRatio: 1.7778,
-                    disableFlip: true,
                     formatsToSupport: [
                         Html5QrcodeSupportedFormats.EAN_13,
                         Html5QrcodeSupportedFormats.EAN_8,
@@ -846,19 +850,14 @@
                 },
                 (decodedText) => {
                     const ean = decodedText.trim();
-                    console.log("EAN DETECTADO:", ean);
-
                     document.getElementById('search-bar').value = ean;
                     CURRENT_FILTERS.query = ean;
-
                     changeSearchScope('ean');
                     applyEngineFilters();
-
                     closeScanner();
                 },
                 () => {}
             ).catch(err => {
-                console.error(err);
                 alert("No se pudo iniciar la cámara: " + err);
                 closeScanner();
             });
@@ -866,17 +865,9 @@
 
         async function closeScanner() {
             document.getElementById('scanner-modal').classList.add('hidden');
-
             if (!html5QrcodeScanner) return;
-
-            try {
-                await html5QrcodeScanner.stop();
-            } catch(e) {}
-
-            try {
-                await html5QrcodeScanner.clear();
-            } catch(e) {}
-
+            try { await html5QrcodeScanner.stop(); } catch(e) {}
+            try { await html5QrcodeScanner.clear(); } catch(e) {}
             html5QrcodeScanner = null;
         }
 
