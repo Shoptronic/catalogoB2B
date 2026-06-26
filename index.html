@@ -356,7 +356,19 @@
 
                             let rawStock = item.DISPONIBILIDAD ? item.DISPONIBILIDAD.toString().trim() : '';
                             item.stockParsed = (rawStock === '' || rawStock === '0') ? 0 : parseInt(rawStock, 10);
+item._searchDesc =
+(
+    (item.NOMBRE || '') + ' ' +
+    (item.MARCA || '') + ' ' +
+    (item.CATEGORIA || '') + ' ' +
+    (item.SUBCATEGORIA || '')
+).toLowerCase();
 
+item._searchRef =
+(item.REFERENCIA || '').toLowerCase();
+
+item._searchEAN =
+(item.EAN || '').toLowerCase();
                             store.put(item);
                         }
 
@@ -773,10 +785,21 @@
         }
 
         // DISPARADORES DE EVENTOS
-        function handleSearch() {
-            CURRENT_FILTERS.query = document.getElementById('search-bar').value;
-            applyEngineFilters();
-        }
+        let searchTimer = null;
+
+function handleSearch() {
+
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(() => {
+
+        CURRENT_FILTERS.query =
+            document.getElementById('search-bar').value;
+
+        applyEngineFilters();
+
+    }, 250);
+}
 
         function handleFilterChange() {
             CURRENT_FILTERS.brand = document.getElementById('brand-select').value;
